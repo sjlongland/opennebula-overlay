@@ -1,0 +1,31 @@
+#!/sbin/openrc-run
+
+depend() {
+	need net opennebula-sunstone-novnc
+	use opennebula
+}
+
+#
+# Function that starts the daemon/service
+#
+start() {
+	for d in /var/run/one /var/lock/one /var/log/one /var/lib/one
+	do
+		if [ ! -d ${d} ]
+		then
+			ebegin "Creating ${d}"
+			mkdir ${d}
+			eend $?
+		fi
+		chown -R oneadmin:oneadmin ${d}
+	done
+	ebegin "Starting OpenNebula Sunstone Web Interface"
+	su oneadmin -s /bin/sh -c "/usr/bin/sunstone-server start-sunstone"
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping OpenNebula Sunstone Web Interface"
+	su oneadmin -s /bin/sh -c "/usr/bin/sunstone-server stop-sunstone"
+	eend $?
+}

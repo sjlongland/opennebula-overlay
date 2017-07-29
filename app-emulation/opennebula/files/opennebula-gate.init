@@ -1,0 +1,34 @@
+#!/sbin/openrc-run
+
+depend() {
+	need net
+	use opennebula
+}
+
+#
+# Function that starts the daemon/service
+#
+start() {
+	for d in /var/run/one /var/lock/one /var/log/one /var/lib/one
+	do
+		if [ ! -d ${d} ]
+		then
+			ebegin "Creating ${d}"
+			mkdir ${d}
+			eend $?
+		fi
+		chown -R oneadmin:oneadmin ${d}
+	done
+	ebegin "Starting OneGate Service"
+	su oneadmin -s /bin/sh -c "/usr/bin/onegate-server start"
+	eend $?
+}
+
+#
+# Function that stops the daemon/service
+#
+stop() {
+	ebegin "Stopping OneGate Service"
+	su oneadmin -s /bin/sh -c "/usr/bin/onegate-server stop"
+	eend $?
+}

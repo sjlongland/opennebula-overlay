@@ -1,0 +1,33 @@
+#!/sbin/openrc-run
+
+depend() {
+	need net
+}
+
+#
+# Function that starts the daemon/service
+#
+start() {
+	for d in /var/run/one /var/lock/one /var/log/one /var/lib/one
+	do
+		if [ ! -d ${d} ]
+		then
+			ebegin "Creating ${d}"
+			mkdir ${d}
+			eend $?
+		fi
+		chown -R oneadmin:oneadmin ${d}
+	done
+	ebegin "Starting OpenNebula cloud"
+	su oneadmin -s /bin/sh -c '/usr/bin/one start'
+	eend $?
+}
+
+#
+# Function that stops the daemon/service
+#
+stop() {
+	ebegin "Stopping OpenNebula cloud"
+	su oneadmin -s /bin/sh -c '/usr/bin/one stop'
+	eend $?
+}
